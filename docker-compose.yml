@@ -1,0 +1,40 @@
+name: template_for_python
+
+services:
+  db:
+    env_file: ".env"
+    image: cassandra:latest
+    ports:
+      - "5024:9042"
+    restart: always
+    volumes:
+      - ./db:/var/lib/cassandra
+    networks:
+      backend:
+        ipv4_address: 172.15.238.11
+  server:
+    build:
+      context: .
+      args:
+        - GIT_TOKEN=${GIT_TOKEN}
+    ports:
+      - "5025:5025"
+      - "5026:5026"
+    depends_on:
+      - db
+    restart: always
+    volumes:
+      - ./template_for_python:/template_for_python/template_for_python/
+    networks:
+      backend:
+        ipv4_address: 172.15.238.10
+    entrypoint: ["python", "main.py"]
+volumes:
+  db_data:
+networks:
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.15.0.0/16
+          gateway: 172.15.238.1

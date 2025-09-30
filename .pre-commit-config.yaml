@@ -1,0 +1,57 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        args: ["--line-length", "120", "."]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.11.6
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.15.0'
+    hooks:
+      - id: mypy
+        args: ["--always-false=PYQT5"]
+        additional_dependencies: [toml, types-toml, pytest, pytest_mock, pydantic, python-dotenv, retry, tenacity]
+  - repo: https://github.com/python-poetry/poetry
+    rev: "2.1.2"
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+  - repo: https://github.com/python-poetry/poetry-plugin-export
+    rev: "1.9.0"
+    hooks:
+      - id: poetry-export
+        args: [ "-f", "requirements.txt", "--without-hashes", "-o", "./requirements.txt" ]
+      - id: poetry-export
+        args: [ "-f", "requirements.txt", "--without-hashes", "--with", "dev", "-o", "./requirements-dev.txt" ]
+  - repo: local
+    hooks:
+      - id: pytest-check
+        name: pytest-check
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+  - repo: local
+    hooks:
+      - id: sed-requirements
+        name: sed
+        entry: sed
+        args: [ '-i','.bak','s/git+ssh:\/\/git@github.com\//git+https:\/\/domarm:\$\{GIT_TOKEN\}@github.com\//', "requirements.txt" ]
+        language: system
+        pass_filenames: false
+        always_run: true
+  - repo: local
+    hooks:
+      - id: sed-requirements-dev
+        name: sed
+        entry: sed
+        args: [ '-i','.bak','s/git+ssh:\/\/git@github.com\//git+https:\/\/domarm:\$\{GIT_TOKEN\}@github.com\//', "requirements-dev.txt" ]
+        language: system
+        pass_filenames: false
+        always_run: true
